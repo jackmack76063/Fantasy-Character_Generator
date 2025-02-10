@@ -2,6 +2,7 @@
 Referenced Code from previous courses, including CS374 and PCC's CS162. All code is my own.
 Referenced code for strrchr(): https://www.tutorialspoint.com/c_standard_library/c_function_strrchr.htm
 Adapted Code for random numbers in range: https://www.geeksforgeeks.org/generating-random-number-range-c/
+Referenced for popular character personality types: https://www.personality-database.com/profile?pid=2
 */
 
 void browsePersonalities(void);

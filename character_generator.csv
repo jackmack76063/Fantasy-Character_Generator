@@ -1,6 +1,6 @@
 Male,Female,Nonbinary
-Elf,Dwarf,Fae,Warrior,Orc,Werewolf,Wizard,Vampire
-Ax,Sword,Bow,Magic,Daggers,Wand,Poison
+Elf,Dwarf,Fae,Human,Werewolf,Wizard,Vampire
+Ax,Sword,Bow,Magic,Dagger,Wand,Poison,Gun
 INTJ,INTP,INFJ,INFP,ISTJ,ISFJ,ISTP,ISFP,ENTJ,ENTP,ENFJ,ENFP,ESTJ,ESFJ,ESTP,ESFP
-Brown,Black,Green,Blue,Gold,Red,White,Blonde 
-Brown,Black,Green,Blue,Gold,Red,White
+Brown,Black,Green,Blue,Gold,Red,White,Blonde,None 
+Brown,Black,Green,Blue,Gold,Red,White,Hazel
