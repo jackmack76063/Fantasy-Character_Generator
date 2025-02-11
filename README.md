@@ -1,4 +1,4 @@
-Fantasy Character Generator
+# Fantasy Character Generator
 
 This program acts as a brainstorming tool to plan and visualize new fantasy characters.
 
