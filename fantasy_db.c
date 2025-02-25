@@ -216,7 +216,7 @@ strcpy(filePath, "character_db.csv");
 
             case 8: 
 
-                printf("Warning: Are you sure you want to quit?! (Y/N): ");
+                printf("Warning: Are you sure you want to quit?! Quitting will delete any unsaved prograss! (Y/N): ");
                 scanf("%s", warning);
                 if(strcmp(warning, "y") == 0 || strcmp(warning, "y") == 0)  {
                     ifTrue = true;
