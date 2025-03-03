@@ -16,6 +16,7 @@ Referenced for popular character personality types: https://www.personality-data
 #include <dirent.h>
 #include <stdbool.h>
 #include <time.h>
+#include <zmg.h>
 
 /*Stores characters*/
 struct fantasy{
@@ -31,38 +32,29 @@ struct fantasy{
 typedef struct fantasy Record;
 
 /*Functions*/
-void browsePersonalities(void);
+Record* loadCharactersFromFile(const char *filePath);
 void browseCharacters(Record* head);
-void processFile(Record** head, char* filePath);
 void browseSpecies();
+void browsePersonalities();
+void freeList(Record *head);
+void send_request();
 
-
-
-int main(void) {
+int main() {
     char *filePath = malloc(256 * sizeof(char));
     int option = 0;
     char warning[1];
     bool ifTrue = false;
-    int pSize = 0;
-    char *line = NULL;
-    int lineTrack = 0;
-    size_t len = 0;
-    size_t line_count = 0;
-    char *currLine = NULL; 
-    char *token = NULL;
-    char *endptr = NULL;
-    Record* head = NULL;
-    Record* temp;
-    Record* current;
+    Record *head = NULL;
 
-strcpy(filePath, "character_db.csv");
-//Welcome Message
+    strcpy(filePath, "character_db.csv");
+    head = loadCharactersFromFile(filePath); // Load once
+    //Welcome Message
     printf("Welcome to my Character Generator!\n\n");
     printf("I am going to help you create your own characters!\n\n");
     printf("You will be given the options to manually create a fantasy character.\n\n");
     printf("You can also search by personality and species, or have us create one for you!\n");
 
-//Main Menu
+    //Main Menu
 
 
     do{
@@ -109,99 +101,8 @@ strcpy(filePath, "character_db.csv");
 
             case 5: ;
                 
-                // Getting file line amount for memmory allocation
-                FILE *characterFile = fopen(filePath, "r");
-
-                while(getline(&line, &len, characterFile) != -1)
-                {
-                //printf("%s", currLine);
-                line_count++;
-                }
-                line_count--;
-                pSize = line_count;
-                // Free the memory allocated by getline for currLine
-                free(line);
-                // Close the file
-                fclose(characterFile);
-
-                //Processing file into our struct.  
-                //Open the file to read the data and store it in our struct
-                characterFile = fopen(filePath, "r");
-                    // Read the file line by line
                 
-                while(getline(&currLine, &len, characterFile) != -1)
-                    {  
-                    
-                    //ignoring first line that contains headers
-                    if(lineTrack == 0){
-                            lineTrack++;
-                            continue;
-                    }  
-                    
-                    temp = (Record *) malloc(sizeof(Record));
-                    token = strtok(currLine, ",");
-                    //store the length of our token in size, to dynamically allocate
-                    //1st token is our name
-                    temp->name= calloc(strlen(token) + 1, sizeof(char)); 
-                    if (temp->name != NULL) {
-                        strcpy(temp->name, token);     
-                    }
-                    //2nd token is our gender
-                    token = strtok(NULL, ",");
-                    temp->gender = calloc(strlen(token) + 1, sizeof(char)); 
-                    if (temp->gender != NULL) {
-                        strcpy(temp->gender, token);       
-                    }
-                    //3rd token is our species
-                    token = strtok(NULL, ",");
-                    temp->species = calloc(strlen(token) + 1, sizeof(char)); 
-                    if (temp->species != NULL) {
-                        strcpy(temp->species, token);       
-                    }
-                    //4th token is our weapon
-                    token = strtok(NULL, ",");
-                    temp->weapon = calloc(strlen(token) + 1, sizeof(char)); 
-                    if (temp->weapon != NULL) {
-                        strcpy(temp->weapon, token);       
-                    } 
-                    //5th token is our personality
-                    token = strtok(NULL, ",");
-                    temp->personality = calloc(strlen(token) + 1, sizeof(char)); 
-                    if (temp->personality != NULL) {
-                        strcpy(temp->personality, token);       
-                    } 
-                    //6th token is our hair color
-                    token = strtok(NULL, ",");
-                    temp->hair = calloc(strlen(token) + 1, sizeof(char)); 
-                    if (temp->hair != NULL) {
-                        strcpy(temp->hair, token);       
-                    } 
-                    //6th token is our eye color
-                    token = strtok(NULL, ",");
-                    temp->eye = calloc(strlen(token) + 1, sizeof(char)); 
-                    if (temp->eye != NULL) {
-                        strcpy(temp->eye, token);       
-                    } 
-
-                    temp->next = NULL;
-
-                    
-                    if (head == NULL){
-                        head = temp;
-                    }
-                    else{
-                        current = head;
-                        while (current->next != NULL){
-                            current = current->next;
-                        }
-                        current->next = temp;
-                    }  
-
-                }    
-                // Free the memory allocated by getline for currLine
-                free(currLine);
-                // Close the file
-                fclose(characterFile);                
+                               
                 browseCharacters(head);
 
                 break;
@@ -226,6 +127,8 @@ strcpy(filePath, "character_db.csv");
         }
     } while (option!=8 || (!ifTrue));
 
+    freeList(head);
+    return 0; 
 }
 
 /*Function Lists static data regarding personality types.
@@ -262,19 +165,130 @@ void browsePersonalities(void){
     }
 }
 
+/*This function processes the file that acts
+as our character db, by allocating each line 
+in the file to its respective attribute*/
 
- 
-      
+Record* loadCharactersFromFile(const char *filePath){
+    char *currLine = NULL;
+    char *line = NULL;
+    char *token = NULL;
+    size_t len = 0;
+    size_t line_count = 0;
+    int lineTrack = 0;
+    int pSize = 0;
+    Record *head = NULL, *current = NULL, *temp = NULL;
+    FILE *characterFile = fopen(filePath, "r");
 
+    // Getting file line amount for memmory allocation
+    while(getline(&line, &len, characterFile) != -1) {
+        //printf("%s", currLine);
+        line_count++;
+    }
+    line_count--;
+    pSize = line_count;
+    // Free the memory allocated by getline for currLine
+    free(line);
+    // Close the file
+    fclose(characterFile);
+
+    //Processing file into our struct.  
+    //Open the file to read the data and store it in our struct
+    characterFile = fopen(filePath, "r");
+    // Read the file line by line
+                
+    while(getline(&currLine, &len, characterFile) != -1)
+    {  
+                    
+        //ignoring first line that contains headers
+        if(lineTrack == 0){
+            lineTrack++;
+            continue;
+        }  
+                    
+        temp = (Record *) malloc(sizeof(Record));
+        token = strtok(currLine, ",");
+        //store the length of our token in size, to dynamically allocate
+        //1st token is our name
+        temp->name= calloc(strlen(token) + 1, sizeof(char)); 
+        if (temp->name != NULL) {
+            strcpy(temp->name, token);     
+        }
+        //2nd token is our gender
+        token = strtok(NULL, ",");
+        temp->gender = calloc(strlen(token) + 1, sizeof(char)); 
+        if (temp->gender != NULL) {
+            strcpy(temp->gender, token);       
+        }
+        //3rd token is our species
+        token = strtok(NULL, ",");
+        temp->species = calloc(strlen(token) + 1, sizeof(char)); 
+        if (temp->species != NULL) {
+            strcpy(temp->species, token);       
+        }
+        //4th token is our weapon
+        token = strtok(NULL, ",");
+        temp->weapon = calloc(strlen(token) + 1, sizeof(char)); 
+        if (temp->weapon != NULL) {
+            strcpy(temp->weapon, token);       
+        } 
+        //5th token is our personality
+        token = strtok(NULL, ",");
+        temp->personality = calloc(strlen(token) + 1, sizeof(char)); 
+        if (temp->personality != NULL) {
+            strcpy(temp->personality, token);       
+        } 
+        //6th token is our hair color
+        token = strtok(NULL, ",");
+        temp->hair = calloc(strlen(token) + 1, sizeof(char)); 
+        if (temp->hair != NULL) {
+            strcpy(temp->hair, token);       
+        } 
+        //6th token is our eye color
+        token = strtok(NULL, ",");
+        temp->eye = calloc(strlen(token) + 1, sizeof(char)); 
+        if (temp->eye != NULL) {
+            strcpy(temp->eye, token);       
+        } 
+
+        temp->next = NULL;
+
+                    
+        if (head == NULL){
+            head = temp;
+        }
+        else {
+            current = head;
+            while (current->next != NULL){
+            current = current->next;
+            }
+            current->next = temp;
+        }  
+
+    }    
+    // Free the memory allocated by getline for currLine
+    free(currLine);
+    // Close the file
+    fclose(characterFile);   
+    
+    return head;
+}
 /*Function reads off linked list of characters
 Only names are displayed, then user has option
 to see more details of each character.
 Prereqs: "character_db.csv" must be processed
 prior to calling this function.*/
 void browseCharacters(Record * head){
+    
+    if (!head) {
+        printf("No characters available.\n");
+        return;
+    }
+
     Record* temp = head;
     char details[30];
     bool ifFound = false;
+
     printf("Now Displaying All Characters Saved\n\n");
      
     while(temp != NULL){
@@ -329,4 +343,40 @@ void browseSpecies(){
     }
 
 
+}
+/*This function frees the memory by going through each attribute*/
+void freeList(Record *head) {
+    Record *temp;
+    while (head != NULL) {
+        temp = head;
+        head = head->next;
+
+        free(temp->name);
+        free(temp->gender);
+        free(temp->species);
+        free(temp->weapon);
+        free(temp->personality);
+        free(temp->hair);
+        free(temp->eye);
+        free(temp);
+    }
+}
+
+/*This function opens up a a zmq conntection for sending data*/
+void send_request(){
+    const char *request_message = "character_generator.csv";
+    const char *quit_message = "q";
+    char buffer[256];
+    void *context = zmq_ctx_new;
+    void *socket = zmq_socket(context, ZMQ_REQ);
+    
+    zmq_connect(socket, "tcp://localhost:5555");
+    zmq_send(socket, request_message, strlen(request_message), 0);
+    
+    zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
+    buffer[255] = '\0';
+
+    zmq_send(socket, quit_message, strlen(quit_message), 0);
+    zmq_close(socket);
+    zmq_ctx_destroy(context);
 }
