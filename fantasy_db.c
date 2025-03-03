@@ -16,7 +16,7 @@ Referenced for popular character personality types: https://www.personality-data
 #include <dirent.h>
 #include <stdbool.h>
 #include <time.h>
-#include <zmg.h>
+#include <zmq.h>
 
 /*Stores characters*/
 struct fantasy{
@@ -366,16 +366,40 @@ void freeList(Record *head) {
 void send_request(){
     const char *request_message = "character_generator.csv";
     const char *quit_message = "q";
+    char option[1];
     char buffer[256];
+    char character_name[50];
     void *context = zmq_ctx_new;
     void *socket = zmq_socket(context, ZMQ_REQ);
     
     zmq_connect(socket, "tcp://localhost:5555");
-    zmq_send(socket, request_message, strlen(request_message), 0);
     
+    do{
+    zmq_send(socket, request_message, strlen(request_message), 0);
     zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
     buffer[255] = '\0';
 
+    printf("\nHere are you generated character attributes:\n%s\n", buffer);
+    printf("\nWould you like to save this character? (y/n): ");
+    scanf("%s", option);
+    while(strcmp(option, "y") !=0 || strcmp(option, "n") !=0){
+        printf("\nIncorrect command.");
+        printf("\nWould you like to save this character? (y/n): ");
+        scanf("%s", option);
+    }
+    
+    }while(strcmp(option, "y") != 0 );
+
+    printf("\nEnter a name for this character: ");
+    scanf(" %49[^\n]", character_name);
+
+    //Open our character_db file to append
+    FILE *file = fopen("character_db.csv", "a");
+    fprintf(file, "%s,%s\n", character_name, buffer);
+    fclose(file);
+
+    printf("Character successfully added to character_db.csv!\n");
+    //severing connection to our server
     zmq_send(socket, quit_message, strlen(quit_message), 0);
     zmq_close(socket);
     zmq_ctx_destroy(context);
