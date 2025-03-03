@@ -285,23 +285,28 @@ void browseCharacters(Record * head){
 
         temp = head;
         printf("\nEnter name to show more details, or 'quit' to exit to main menu: ");
-        scanf("%s", details);
+        
+        scanf("%29s", details);
+
+        if (strcmp(details, "quit") == 0) {
+            break;  
+        }
+
+        ifFound = false;  
+
         while(temp!=NULL){
-            ifFound = false;
             if(strcmp(details, temp->name) == 0){
                 printf("\n\nName: %s Gender: %s Species: %s Weapon: %s Personality: %s Hair Color: %s Eye Color: %s\n", 
                 temp->name, temp->gender, temp->species, temp->weapon, temp->personality, temp->hair, temp->eye);
                 ifFound = true;
-            }
-            else if(strcmp(details, "quit") ==0){
                 break;
             }
             temp = temp->next;
         }
-        if(ifFound){
+        if(ifFound != true){
             printf("Character not found, try again.");
         }
-    }while(strcmp(details, "quit") != 0);
+    }while(1);
 }
 
 void browseSpecies(){
