@@ -86,6 +86,8 @@ int main() {
             break;
             
             case 2:
+
+                send_request();
             
             break;
 
@@ -382,7 +384,7 @@ void send_request(){
     printf("\nHere are you generated character attributes:\n%s\n", buffer);
     printf("\nWould you like to save this character? (y/n): ");
     scanf("%s", option);
-    while(strcmp(option, "y") !=0 || strcmp(option, "n") !=0){
+    while(strcmp(option, "y") != 0 && strcmp(option, "n") != 0){
         printf("\nIncorrect command.");
         printf("\nWould you like to save this character? (y/n): ");
         scanf("%s", option);
