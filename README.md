@@ -26,6 +26,16 @@ browsing our "character_db.csv"
 
 ### compile: python random_server.py
 
+Description: This Microservice performs the task of randomly generating a character.
+
+-Recieves message via ZeroMQ from main program 
+
+-The message, a file name, will open up the file character_generator.csv
+
+-This file will give attributes of a character and all the options available in each attribute
+
+-It will then randomly generate each attribute, group the responses together, and return to main program.
+
 ## character_db.csv
 
 A file in csv format that acts a "database" for characters and their attributes.
