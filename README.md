@@ -10,9 +10,11 @@ compiler: gcc --std=gnu99 -o character_generator *.c
 
 ## Main Program: fantasy_db.c
 
-compile: gcc fantasy_db.c -o fantasy_db -lzmq
+### Language: C 
 
-As stated, our main program that holds the functionality for creating a character,
+### compile: gcc fantasy_db.c -o fantasy_db -lzmq
+
+Description: As stated, our main program that holds the functionality for creating a character,
 
 researching species and personality types, searching by specific types, and 
 
@@ -20,7 +22,9 @@ browsing our "character_db.csv"
 
 ## Microservice 1: random_server.py
 
-compile: python random_server.py
+### Language: Python
+
+### compile: python random_server.py
 
 ## character_db.csv
 
