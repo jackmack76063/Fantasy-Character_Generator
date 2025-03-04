@@ -329,7 +329,7 @@ void browseSpecies(){
     char option[10];
     
     printf("Personality Types: \n\n");
-    printf("\nElf :folk tale creature who is a small, elusive figure with pointy ears and magical abilities.\n");
+    printf("\nElf : folk tale creature who is a small, elusive figure with pointy ears and magical abilities.\n");
     printf("\nDwarf:  mythical race of short, stocky humanlike creatures who are generally skilled in mining and metalworking.\n");
     printf("\nFae: A beautiful, supernatural being often depicted as tricksters.\n");
     printf("\nHuman: Average in appearance, can be reckless and brutal.\n");
@@ -365,43 +365,90 @@ void freeList(Record *head) {
 }
 
 /*This function opens up a a zmq conntection for sending data*/
-void send_request(){
+void send_request() {
     const char *request_message = "character_generator.csv";
     const char *quit_message = "q";
-    char option[1];
-    char buffer[256];
+    char option[5];  // Fix buffer overflow
+    char buffer[256];  // Increased buffer safety
+    char buffer_copy[256];
     char character_name[50];
-    void *context = zmq_ctx_new;
-    void *socket = zmq_socket(context, ZMQ_REQ);
-    
-    zmq_connect(socket, "tcp://localhost:5555");
-    
-    do{
-    zmq_send(socket, request_message, strlen(request_message), 0);
-    zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
-    buffer[255] = '\0';
 
-    printf("\nHere are you generated character attributes:\n%s\n", buffer);
-    printf("\nWould you like to save this character? (y/n): ");
-    scanf("%s", option);
-    while(strcmp(option, "y") != 0 && strcmp(option, "n") != 0){
-        printf("\nIncorrect command.");
-        printf("\nWould you like to save this character? (y/n): ");
-        scanf("%s", option);
+    void *context = zmq_ctx_new();
+    void *socket = zmq_socket(context, ZMQ_REQ);
+
+    if (zmq_connect(socket, "tcp://localhost:5555") != 0) {
+        printf("Failed to connect to server.\n");
+        fflush(stdout);
+        zmq_close(socket);
+        zmq_ctx_destroy(context);
+        return;
+    } 
+
+    // Send request
+    int bytes_sent = zmq_send(socket, request_message, strlen(request_message), 0);
+    if (bytes_sent == -1) {
+        printf("Error: Failed to send request to server.\n");
+        fflush(stdout);
+        zmq_close(socket);
+        zmq_ctx_destroy(context);
+        return;
+    }
+
+    // Receive response correctly
+    memset(buffer, 0, sizeof(buffer));  // Ensure buffer is empty
+    int recv_size = zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
+    if (recv_size > 0) {
+        buffer[recv_size] = '\0';  // Correct null-termination
+        printf("\nGenerating Character...\n");
+    } else {
+        printf("Error: No data received from server.\n");
+        zmq_close(socket);
+        zmq_ctx_destroy(context);
+        return;
+    }
+    //copy the buffer so it isn't modified permanetly by tokenizing
+    strcpy(buffer_copy, buffer);
+    
+    char *token = strtok(buffer, ",");
+    if (token == NULL) {
+        printf("Error: Failed to tokenize response.\n");
+        zmq_close(socket);
+        zmq_ctx_destroy(context);
+        return;
     }
     
-    }while(strcmp(option, "y") != 0 );
+    // Print values without storing them
+      // Print values without storing them
+      printf("\nGender: %s\n", token);
+      printf("Species: %s\n", (token = strtok(NULL, ",")));
+      printf("Weapon: %s\n", (token = strtok(NULL, ",")));
+      printf("Personality Type: %s\n", (token = strtok(NULL, ",")));
+      printf("Hair Color: %s\n", (token = strtok(NULL, ",")));
+      printf("Eye Color: %s\n", (token = strtok(NULL, ",")));
 
-    printf("\nEnter a name for this character: ");
-    scanf(" %49[^\n]", character_name);
+    printf("\nWould you like to save this character? (y/n): ");
+    scanf("%4s", option);
 
-    //Open our character_db file to append
-    FILE *file = fopen("character_db.csv", "a");
-    fprintf(file, "%s,%s\n", character_name, buffer);
-    fclose(file);
+    while (strcmp(option, "y") != 0 && strcmp(option, "n") != 0) {
+        printf("\nIncorrect command. Please enter 'y' or 'n'.");
+        printf("\nWould you like to save this character? (y/n): ");
+        scanf("%4s", option);
+    }
 
-    printf("Character successfully added to character_db.csv!\n");
-    //severing connection to our server
+    if (strcmp(option, "y") == 0 || strcmp(option, "Y") == 0) {
+        printf("\nEnter a name for this character: ");
+        scanf(" %49[^\n]", character_name);
+
+        FILE *file = fopen("character_db.csv", "a");
+        if (file) {
+            fprintf(file, "%s,%s\n", character_name, buffer_copy);
+            fclose(file);
+            printf("Character successfully added to character_db.csv!\n");
+        } else {
+            printf("Error: Could not open file for writing.\n");
+        }
+    }
+
     zmq_send(socket, quit_message, strlen(quit_message), 0);
     zmq_close(socket);
     zmq_ctx_destroy(context);
