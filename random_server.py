@@ -4,6 +4,7 @@ context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:5555")
 
+print("Microservice is running...")
 while True:
     # Wait for request from client
     message = socket.recv()
@@ -13,17 +14,29 @@ while True:
     if filename.lower() == 'q':
         print("Received shutdown request. Closing the server.")
         break
-
+    try:
+        file = open(filename, 'r')
+        print("File opened successfully.")
+    except FileNotFoundError:
+        print(f"Error: The file {filename} was not found.")
+        break
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        break
     print("Received request for file:", filename)
+
+    # Initialize lists to store character attributes
+    gender = []
+    species = []
+    weapon = []
+    personality = []
+    hair = []
+    eyes = []
 
     try:
         with open(filename, 'r') as file:
+            
             lines = file.readlines()
-
-            if len(lines) < 6:
-                print(f"Error: File {filename} does not have enough lines.")
-                socket.send_string("Error: Invalid file format")
-                continue
 
             gender = lines[0].strip().split(',')
             species = lines[1].strip().split(',')
@@ -32,23 +45,20 @@ while True:
             hair = lines[4].strip().split(',')
             eyes = lines[5].strip().split(',')
 
-            # Create a random character
-            character = {
-                'gender': random.choice(gender),
-                'species': random.choice(species),
-                'weapon': random.choice(weapon),
-                'personality': random.choice(personality),
-                'hair': random.choice(hair),
-                'eyes': random.choice(eyes)
-            }
-            print(f"Generated character: {character}")
-            response = f"{character['gender']},{character['species']},{character['weapon']},{character['personality']},{character['hair']},{character['eyes']}"
-            print(f"Debug: Sending response to client: {response}")
-            socket.send_string(response)  # Send formatted response
-
-    except FileNotFoundError:
-        print(f"Error: The file {filename} was not found.")
-        socket.send_string("Error: File not found")
     except Exception as e:
-        print(f"An error occurred: {e}")
-        socket.send_string(f"Error: {e}")
+        print(f"An error occurred while reading the file: {e}")
+
+            # Create a random character
+    character = {
+        'gender': random.choice(gender),
+        'species': random.choice(species),
+        'weapon': random.choice(weapon),
+        'personality': random.choice(personality),
+        'hair': random.choice(hair),
+        'eyes': random.choice(eyes)
+    }
+    # formatting response to be in csv format
+    response = f"{character['gender']},{character['species']},{character['weapon']},{character['personality']},{character['hair']},{character['eyes']}"
+    socket.send_string(response)  # Send formatted response
+
+    

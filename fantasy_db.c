@@ -404,9 +404,9 @@ void generateRandom() {
 
     // Receive response correctly
     memset(buffer, 0, sizeof(buffer));  // Ensure buffer is empty
-    int recv_size = zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
-    if (recv_size > 0) {
-        buffer[recv_size] = '\0';  // Correct null-termination
+    int size = zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
+    if (size > 0) {
+        buffer[size] = '\0';  // Correct null-termination
         printf("\nGenerating Character...\n");
     } else {
         printf("Error: No data received from server.\n");
@@ -465,15 +465,16 @@ void generateRandom() {
 to our microservice: add_character.py 
 Sends: A message containing user input for a new character in csv format.
 Recieves: A message confirming character attributes */
-void newCharacter{
+void newCharacter(){
     char name[50], gender[10], species[20], weapon[20], personality[20], hair[15], eyes[15];
     char message[256];
     char buffer[256];  
+    char option[5];
+
 
     void *context = zmq_ctx_new();
     void *socket = zmq_socket(context, ZMQ_REQ);
-
-    if (zmq_connect(socket, "tcp://localhost:5555") != 0) {
+    if (zmq_connect(socket, "tcp://localhost:5556") != 0) {
         printf("Failed to connect to server.\n");
         fflush(stdout);
         zmq_close(socket);
@@ -517,9 +518,21 @@ void newCharacter{
 
         //sending character attributes and recieving confirmation of character
         zmq_send(socket, message, strlen(message), 0);
-        buffer[size(buffer) - 1] = '\0';
-        printf("\n%s\n", response);
-    
+        
+        //recieving message back, place in buffer
+        memset(buffer, 0, sizeof(buffer));  // Ensure buffer is empty
+        int size = zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
+        if (size > 0) {
+            buffer[size] = '\0';  //null-termination
+            printf("\nGenerating Character...\n");
+        } else {
+            printf("Error: No data received from server.\n");
+            zmq_close(socket);
+            zmq_ctx_destroy(context);
+            return;
+        }
+        printf("\n%s\n", buffer);
+        
     }
     zmq_close(socket);
     zmq_ctx_destroy(context);
