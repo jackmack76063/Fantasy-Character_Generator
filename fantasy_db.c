@@ -37,7 +37,8 @@ void browseCharacters(Record* head);
 void browseSpecies();
 void browsePersonalities();
 void freeList(Record *head);
-void send_request();
+void generateRandom();
+void newCharacter();
 
 int main() {
     char *filePath = malloc(256 * sizeof(char));
@@ -83,11 +84,12 @@ int main() {
 
             case 1:
             
+                newCharacter();
             break;
             
             case 2:
 
-                send_request();
+                generateRandom();
             
             break;
 
@@ -364,8 +366,14 @@ void freeList(Record *head) {
     }
 }
 
-/*This function opens up a a zmq conntection for sending data*/
-void send_request() {
+/*This function opens up a a zmq conntection for sending data
+to our microservice: random_server.py
+Sends: file path to a file with the character attributes, 
+along with all the attribute options.
+Recieves: randomly generated character attributes
+The function will then take the message, parse it, and
+append it to our character_db.csv*/
+void generateRandom() {
     const char *request_message = "character_generator.csv";
     const char *quit_message = "q";
     char option[5];  // Fix buffer overflow
@@ -450,6 +458,69 @@ void send_request() {
     }
 
     zmq_send(socket, quit_message, strlen(quit_message), 0);
+    zmq_close(socket);
+    zmq_ctx_destroy(context);
+}
+/*This function opens up a a zmq conntection for sending data
+to our microservice: add_character.py 
+Sends: A message containing user input for a new character in csv format.
+Recieves: A message confirming character attributes */
+void newCharacter{
+    char name[50], gender[10], species[20], weapon[20], personality[20], hair[15], eyes[15];
+    char message[256];
+    char buffer[256];  
+
+    void *context = zmq_ctx_new();
+    void *socket = zmq_socket(context, ZMQ_REQ);
+
+    if (zmq_connect(socket, "tcp://localhost:5555") != 0) {
+        printf("Failed to connect to server.\n");
+        fflush(stdout);
+        zmq_close(socket);
+        zmq_ctx_destroy(context);
+        return;
+    } 
+
+    printf("\nEnter Character Details:\n");
+    printf("Name: ");
+    scanf(" %49[^\n]", name);
+    printf("\nGender: ");
+    scanf(" %9s", gender);
+    printf("\nSpecies: ");
+    scanf(" %19s", species);
+    printf("\nWeapon: ");
+    scanf(" %19s", weapon);
+    printf("\nPersonality: ");
+    scanf(" %19s", personality);
+    printf("\nHair Color: ");
+    scanf(" %14s", hair);
+    printf("\nEye Color: ");
+    scanf(" %14s", eyes);
+
+    printf("\nYou entered the following character:\n");
+    printf("Name: %s\n", name);
+    printf("Gender: %s\n", gender);
+    printf("Species: %s\n", species);
+    printf("Weapon: %s\n", weapon);
+    printf("Personality: %s\n", personality);
+    printf("Hair color: %s\n", hair);
+    printf("Eye color: %s\n", eyes);
+
+    printf("Are you sure you want to add this character?\n You will not be able to undo! (Y/N): ");
+    scanf("%4s", option);
+
+    //If user confirms to add the character, we send a yes response to microservice
+    if (strcmp(option, "y") == 0 || strcmp(option, "Y") == 0){
+        
+        snprintf(message, sizeof(message), "%s,%s,%s,%s,%s,%s,%s", 
+                name, gender, species, weapon, personality, hair, eyes);
+
+        //sending character attributes and recieving confirmation of character
+        zmq_send(socket, message, strlen(message), 0);
+        buffer[size(buffer) - 1] = '\0';
+        printf("\n%s\n", response);
+    
+    }
     zmq_close(socket);
     zmq_ctx_destroy(context);
 }
