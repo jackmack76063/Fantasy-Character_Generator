@@ -45,3 +45,21 @@ A file in csv format that acts a "database" for characters and their attributes.
 A file in csv format that holds a list of attributes (sans "name") and their
 
 options. Used to randomly generate a character.
+
+##Main Program: fantasy_db.c
+
+compile: gcc fantasy_db.c -o fantasy_db -lzmq
+
+As stated, our main program that holds the functionality for creating a character,
+
+researching species and personality types, searching by specific types, and 
+
+browsing our "character_db.csv"
+
+##Microservice 1: random_server.py
+
+compile: python random_server.py
+
+##character_db.csv
+
+A file in csv format that acts a "database" for characters and their attributes.
