@@ -18,7 +18,7 @@ researching species and personality types, searching by specific types, and
 
 browsing our "character_db.csv"
 
-# #Microservice 1: random_server.py
+## Microservice 1: random_server.py
 
 compile: python random_server.py
 
