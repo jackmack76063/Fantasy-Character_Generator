@@ -11,7 +11,7 @@ Users have the option to:
 - search by personality type
 - -search by species type
 
-##Instructions: Users will need to compile and run each sepearate microservice, along with our main program, in sepearate terminals.
+## Instructions: Users will need to compile and run each sepearate microservice, along with our main program, in sepearate terminals.
 
 ## Main Program: fantasy_db.c
 
