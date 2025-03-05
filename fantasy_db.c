@@ -14,8 +14,6 @@ Referenced for popular character personality types: https://www.personality-data
 #include <string.h>
 #include <stdbool.h>
 #include <dirent.h>
-#include <stdbool.h>
-#include <time.h>
 #include <zmq.h>
 
 /*Stores characters*/
@@ -39,6 +37,8 @@ void browsePersonalities();
 void freeList(Record *head);
 void generateRandom();
 void newCharacter();
+void searchPersonality();
+void searchSpecies();
 
 int main() {
     char *filePath = malloc(256 * sizeof(char));
@@ -48,7 +48,9 @@ int main() {
     Record *head = NULL;
 
     strcpy(filePath, "character_db.csv");
-    head = loadCharactersFromFile(filePath); // Load once
+    //populating struct with db file
+    head = loadCharactersFromFile(filePath); 
+
     //Welcome Message
     printf("Welcome to my Character Generator!\n\n");
     printf("I am going to help you create your own characters!\n\n");
@@ -59,6 +61,7 @@ int main() {
 
 
     do{
+        printf("MAIN MENU\n");
         printf("\nTo begin, enter the correct number option you wish to carry out.\n Typing '8' will exit the program!\n\n");
         printf("\n1. Add New Character\n");
         printf("2. Randomly Generate Character\n");
@@ -85,39 +88,44 @@ int main() {
             case 1:
             
                 newCharacter();
-            break;
+                break;
             
             case 2:
 
                 generateRandom();
             
-            break;
+                break;
 
             case 3:
 
                 browsePersonalities();
-            break;
+                break;
 
             case 4:
                 browseSpecies();
 
-            break;
+                break;
 
             case 5: ;
                 
-                
-                               
+                //free current struct and reload with updated db file
+                freeList(head);
+                head = loadCharactersFromFile(filePath); 
+
                 browseCharacters(head);
 
                 break;
 
             case 6:
 
-            break;
+                searchPersonality();
+
+                break;
 
             case 7:
 
-            break;
+                searchSpecies();
+                break;
 
             case 8: 
 
@@ -126,7 +134,7 @@ int main() {
                 if(strcmp(warning, "y") == 0 || strcmp(warning, "y") == 0)  {
                     ifTrue = true;
                 }
-            break;
+                break;
 
         }
     } while (option!=8 || (!ifTrue));
@@ -161,10 +169,10 @@ void browsePersonalities(void){
     printf("ESTP: “Adventurer”- Curious, Problem-Solver, Spontaneous\n");
     printf("ESFP: “The Entertainer”- Tactful, Playful, Friendly\n");
     
-    printf("\nEnter 'exit' to go back to main menu: ");
+    printf("\nEnter 'exit' to return to previous page: ");
     scanf("%s", option);
     while(strcmp(option, "exit") !=0) {
-        printf("\nInocorrect option, enter 'exit' to go back to main menu: ");
+        printf("\nInocorrect option, enter 'exit' to return to previous page: ");
         scanf("%s", option);
     }
 }
@@ -330,7 +338,7 @@ void browseCharacters(Record * head){
 void browseSpecies(){
     char option[10];
     
-    printf("Personality Types: \n\n");
+    printf("Species Types: \n\n");
     printf("\nElf : folk tale creature who is a small, elusive figure with pointy ears and magical abilities.\n");
     printf("\nDwarf:  mythical race of short, stocky humanlike creatures who are generally skilled in mining and metalworking.\n");
     printf("\nFae: A beautiful, supernatural being often depicted as tricksters.\n");
@@ -339,32 +347,16 @@ void browseSpecies(){
     printf("\nWizard: Being capable of wielding magic and have an affinity for mythical creatures. \n");
     printf("\nVampire: Undead humanoids who have pale skin, fangs, and an affinity for human blood\n");
 
-    printf("\nEnter 'exit' to go back to main menu: ");
+    printf("\nEnter 'exit' to return to previous page: ");
     scanf("%s", option);
     while(strcmp(option, "exit") !=0) {
-        printf("\nInocorrect option, enter 'exit' to go back to main menu: ");
+        printf("\nInocorrect option, enter 'exit' to return to previous page: ");
         scanf("%s", option);
     }
 
 
 }
-/*This function frees the memory by going through each attribute*/
-void freeList(Record *head) {
-    Record *temp;
-    while (head != NULL) {
-        temp = head;
-        head = head->next;
 
-        free(temp->name);
-        free(temp->gender);
-        free(temp->species);
-        free(temp->weapon);
-        free(temp->personality);
-        free(temp->hair);
-        free(temp->eye);
-        free(temp);
-    }
-}
 
 /*This function opens up a a zmq conntection for sending data
 to our microservice: random_server.py
@@ -425,7 +417,6 @@ void generateRandom() {
         return;
     }
     
-    // Print values without storing them
       // Print values without storing them
       printf("\nGender: %s\n", token);
       printf("Species: %s\n", (token = strtok(NULL, ",")));
@@ -461,6 +452,7 @@ void generateRandom() {
     zmq_close(socket);
     zmq_ctx_destroy(context);
 }
+
 /*This function opens up a a zmq conntection for sending data
 to our microservice: add_character.py 
 Sends: A message containing user input for a new character in csv format.
@@ -481,7 +473,7 @@ void newCharacter(){
         zmq_ctx_destroy(context);
         return;
     } 
-
+    printf("\nFrom here you can manually input a new character into the database.\n");
     printf("\nEnter Character Details:\n");
     printf("Name: ");
     scanf(" %49[^\n]", name);
@@ -507,7 +499,7 @@ void newCharacter(){
     printf("Hair color: %s\n", hair);
     printf("Eye color: %s\n", eyes);
 
-    printf("Are you sure you want to add this character?\n You will not be able to undo! (Y/N): ");
+    printf("\nAre you sure you want to add this character?\n You will not be able to undo! (Y/N): ");
     scanf("%4s", option);
 
     //If user confirms to add the character, we send a yes response to microservice
@@ -536,4 +528,145 @@ void newCharacter(){
     }
     zmq_close(socket);
     zmq_ctx_destroy(context);
+    printf("\nExiting to main menu...\n");
+}
+/*This function allows user to enter a personality
+It will then be passed to a microservice which will
+then search for characters by personality and return 
+results*/
+void searchPersonality(){
+
+    char personality[20];
+    char buffer[256]; 
+    char option[2]; 
+    char exitOption[5];
+    
+    printf("\nEntering a personality type will print all characters with that type.\n");
+    printf("For full details on these characters, visit our 'browse characters' page\n");
+    printf("Would you like to look at the 'browse personalities' page to refresh? (y/n): ");
+    scanf("%s", option); 
+    if (strcmp(option, "y") == 0 || strcmp(option, "Y") == 0){
+        browsePersonalities();
+    }
+
+    void *context = zmq_ctx_new();
+    void *socket = zmq_socket(context, ZMQ_REQ);
+    if (zmq_connect(socket, "tcp://localhost:5557") != 0) {
+        printf("Failed to connect to server.\n");
+        fflush(stdout);
+        zmq_close(socket);
+        zmq_ctx_destroy(context);
+        return;
+    } 
+        
+    do{     
+        printf("\nEnter a personality type (or type 'quit' to exit): ");
+        scanf("%s", personality);
+        zmq_send(socket, personality, strlen(personality), 0);
+
+        if (strcmp(personality, "quit") == 0) {
+            printf("Exiting to main menu...\n");
+            break;
+        }
+
+        memset(buffer, 0, sizeof(buffer));  // Ensure buffer is empty
+        int size = zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
+        if (size > 0) {
+            buffer[size] = '\0';  //null-termination
+            printf("\nCharacters that match this personality type: \n");
+        } else {
+            printf("Error: No data received from server.\n");
+            zmq_close(socket);
+            zmq_ctx_destroy(context);
+            return;
+        }    
+    
+        char *token = strtok(buffer, ",");
+        while (token != NULL){
+            printf("%s\n", token);
+            token = strtok(NULL, ",");
+        }
+
+    }while(1);
+
+    zmq_close(socket);
+    zmq_ctx_destroy(context);
+
+}
+
+void searchSpecies(){
+
+    char species[20];
+    char buffer[256]; 
+    char option[2]; 
+    char exitOption[5];
+    
+    printf("\nEntering a species type will print all characters with that type.\n");
+    printf("For full details on these characters, visit our 'browse characters' page\n");
+    printf("Would you like to look at the 'browse species' page to refresh? (y/n): ");
+    scanf("%s", option); 
+    if (strcmp(option, "y") == 0 || strcmp(option, "Y") == 0){
+        browseSpecies();
+    }
+
+    void *context = zmq_ctx_new();
+    void *socket = zmq_socket(context, ZMQ_REQ);
+    if (zmq_connect(socket, "tcp://localhost:5558") != 0) {
+        printf("Failed to connect to server.\n");
+        fflush(stdout);
+        zmq_close(socket);
+        zmq_ctx_destroy(context);
+        return;
+    } 
+        
+    do{     
+        printf("\nEnter a species type (or type 'quit' to exit): ");
+        scanf("%s", species);
+        zmq_send(socket, species, strlen(species), 0);
+
+        if (strcmp(species, "quit") == 0) {
+            printf("Exiting to main menu...\n");
+            break;
+        }
+
+        memset(buffer, 0, sizeof(buffer));  // Ensure buffer is empty
+        int size = zmq_recv(socket, buffer, sizeof(buffer) - 1, 0);
+        if (size > 0) {
+            buffer[size] = '\0';  //null-termination
+            printf("\nCharacters that match this species type: \n");
+        } else {
+            printf("Error: No data received from server.\n");
+            zmq_close(socket);
+            zmq_ctx_destroy(context);
+            return;
+        }    
+    
+        char *token = strtok(buffer, ",");
+        while (token != NULL){
+            printf("%s\n", token);
+            token = strtok(NULL, ",");
+        }
+
+    }while(1);
+
+    zmq_close(socket);
+    zmq_ctx_destroy(context);
+}
+
+/*This function frees the memory by going through each attribute*/
+void freeList(Record *head) {
+    Record *temp;
+    while (head != NULL) {
+        temp = head;
+        head = head->next;
+
+        free(temp->name);
+        free(temp->gender);
+        free(temp->species);
+        free(temp->weapon);
+        free(temp->personality);
+        free(temp->hair);
+        free(temp->eye);
+        free(temp);
+    }
 }
