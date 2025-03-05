@@ -9,7 +9,7 @@ Users have the option to:
 - browse species types
 - browse our full "database" of characters (stored in "character_db.csv")
 - search by personality type
-- -search by species type
+- search by species type
 
 ## Instructions: 
 Users will need to compile and run each sepearate microservice, along with our main program, in sepearate terminals.
