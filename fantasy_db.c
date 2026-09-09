@@ -537,14 +537,14 @@ results*/
 void searchPersonality(){
 
     char personality[20];
-    char buffer[256]; 
-    char option[2]; 
+    char buffer[256];
+    char option[5];
     char exitOption[5];
-    
+
     printf("\nEntering a personality type will print all characters with that type.\n");
     printf("For full details on these characters, visit our 'browse characters' page\n");
     printf("Would you like to look at the 'browse personalities' page to refresh? (y/n): ");
-    scanf("%s", option); 
+    scanf("%4s", option);
     if (strcmp(option, "y") == 0 || strcmp(option, "Y") == 0){
         browsePersonalities();
     }
@@ -597,14 +597,14 @@ void searchPersonality(){
 void searchSpecies(){
 
     char species[20];
-    char buffer[256]; 
-    char option[2]; 
+    char buffer[256];
+    char option[5];
     char exitOption[5];
-    
+
     printf("\nEntering a species type will print all characters with that type.\n");
     printf("For full details on these characters, visit our 'browse characters' page\n");
     printf("Would you like to look at the 'browse species' page to refresh? (y/n): ");
-    scanf("%s", option); 
+    scanf("%4s", option);
     if (strcmp(option, "y") == 0 || strcmp(option, "Y") == 0){
         browseSpecies();
     }
