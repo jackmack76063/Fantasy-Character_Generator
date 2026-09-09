@@ -106,7 +106,12 @@ Record* loadCharactersFromFile(const char *filePath){
     Record *head = NULL, *current = NULL, *temp = NULL;
     FILE *characterFile = fopen(filePath, "r");
 
-    // Getting file line amount for memmory allocation
+    if (characterFile == NULL) {
+        printf("Error: could not open %s\n", filePath);
+        return NULL;
+    }
+
+    // Getting file line amount for memory allocation
     while(getline(&line, &len, characterFile) != -1) {
         //printf("%s", currLine);
         line_count++;
@@ -118,11 +123,15 @@ Record* loadCharactersFromFile(const char *filePath){
     // Close the file
     fclose(characterFile);
 
-    //Processing file into our struct.  
+    //Processing file into our struct.
     //Open the file to read the data and store it in our struct
     characterFile = fopen(filePath, "r");
+    if (characterFile == NULL) {
+        printf("Error: could not open %s\n", filePath);
+        return NULL;
+    }
     // Read the file line by line
-                
+
     while(getline(&currLine, &len, characterFile) != -1)
     {  
                     

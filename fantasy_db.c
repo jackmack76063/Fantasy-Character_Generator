@@ -146,7 +146,7 @@ int main() {
 /*Function Lists static data regarding personality types.
 Might change format later to hide all the details unless
 user requests it.
-Paramaters: None
+Parameters: None
 Returns: None*/
 void browsePersonalities(void){
     char option[10];
@@ -154,7 +154,7 @@ void browsePersonalities(void){
     printf("Personality Types: \n\n");
     printf("\nINTJ: “The Architect”- Strategic, Analytical, Independent\n");
     printf("INTP: “The Logician”- Logical, Inventive, Intellectual \n");
-    printf("INFJ: “The Advocate”- Intuitive, Creative, Idealisti\n");
+    printf("INFJ: “The Advocate”- Intuitive, Creative, Idealistic\n");
     printf("INFP: “Mediator”- Loyal, Driven, Empathetic\n");
     printf("ISTJ: “Logistician”- Responsible, Hardworking, Reserved\n");
     printf("ISFJ: “The Protector”- Gentle, Warm, Helpful\n");
@@ -172,7 +172,7 @@ void browsePersonalities(void){
     printf("\nEnter 'exit' to return to previous page: ");
     scanf("%s", option);
     while(strcmp(option, "exit") !=0) {
-        printf("\nInocorrect option, enter 'exit' to return to previous page: ");
+        printf("\nIncorrect option, enter 'exit' to return to previous page: ");
         scanf("%s", option);
     }
 }
@@ -192,7 +192,12 @@ Record* loadCharactersFromFile(const char *filePath){
     Record *head = NULL, *current = NULL, *temp = NULL;
     FILE *characterFile = fopen(filePath, "r");
 
-    // Getting file line amount for memmory allocation
+    if (characterFile == NULL) {
+        printf("Error: could not open %s\n", filePath);
+        return NULL;
+    }
+
+    // Getting file line amount for memory allocation
     while(getline(&line, &len, characterFile) != -1) {
         //printf("%s", currLine);
         line_count++;
@@ -204,11 +209,15 @@ Record* loadCharactersFromFile(const char *filePath){
     // Close the file
     fclose(characterFile);
 
-    //Processing file into our struct.  
+    //Processing file into our struct.
     //Open the file to read the data and store it in our struct
     characterFile = fopen(filePath, "r");
+    if (characterFile == NULL) {
+        printf("Error: could not open %s\n", filePath);
+        return NULL;
+    }
     // Read the file line by line
-                
+
     while(getline(&currLine, &len, characterFile) != -1)
     {  
                     
@@ -350,7 +359,7 @@ void browseSpecies(){
     printf("\nEnter 'exit' to return to previous page: ");
     scanf("%s", option);
     while(strcmp(option, "exit") !=0) {
-        printf("\nInocorrect option, enter 'exit' to return to previous page: ");
+        printf("\nIncorrect option, enter 'exit' to return to previous page: ");
         scanf("%s", option);
     }
 
@@ -358,11 +367,11 @@ void browseSpecies(){
 }
 
 
-/*This function opens up a a zmq conntection for sending data
+/*This function opens up a zmq connection for sending data
 to our microservice: random_server.py
 Sends: file path to a file with the character attributes, 
 along with all the attribute options.
-Recieves: randomly generated character attributes
+Receives: randomly generated character attributes
 The function will then take the message, parse it, and
 append it to our character_db.csv*/
 void generateRandom() {
@@ -428,7 +437,8 @@ void generateRandom() {
     printf("\nWould you like to save this character? (y/n): ");
     scanf("%4s", option);
 
-    while (strcmp(option, "y") != 0 && strcmp(option, "n") != 0) {
+    while (strcmp(option, "y") != 0 && strcmp(option, "Y") != 0 &&
+           strcmp(option, "n") != 0 && strcmp(option, "N") != 0) {
         printf("\nIncorrect command. Please enter 'y' or 'n'.");
         printf("\nWould you like to save this character? (y/n): ");
         scanf("%4s", option);
@@ -453,10 +463,10 @@ void generateRandom() {
     zmq_ctx_destroy(context);
 }
 
-/*This function opens up a a zmq conntection for sending data
+/*This function opens up a zmq connection for sending data
 to our microservice: add_character.py 
 Sends: A message containing user input for a new character in csv format.
-Recieves: A message confirming character attributes */
+Receives: A message confirming character attributes */
 void newCharacter(){
     char name[50], gender[10], species[20], weapon[20], personality[20], hair[15], eyes[15];
     char message[256];
