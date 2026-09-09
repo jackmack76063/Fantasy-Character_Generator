@@ -12,7 +12,7 @@ Users have the option to:
 - search by species type
 
 ## Instructions: 
-Users will need to compile and run each sepearate microservice, along with our main program, in sepearate terminals.
+Users will need to compile and run each separate microservice, along with our main program, in separate terminals.
 
 ## Main Program: fantasy_db.c
 
@@ -34,7 +34,7 @@ browsing our "character_db.csv"
 
 Description: This microservice performs the task of randomly generating a character.
 
--Recieves message via ZeroMQ from main program 
+-Receives message via ZeroMQ from main program 
 
 -The message, a file name, will open up the file character_generator.csv
 
@@ -50,7 +50,7 @@ Description: This microservice performs the task of randomly generating a charac
 
 Description: This microservice adds a new character to our file "character_db.csv"
 
--Recieves message via ZeroMQ with a character's name, along with all of their seleceted attributes.
+-Receives message via ZeroMQ with a character's name, along with all of their selected attributes.
 
 -The attributes will then append to the end of our file used to hold all of our characters.
 
@@ -64,7 +64,7 @@ Description: This microservice adds a new character to our file "character_db.cs
 
 Description: This microservice will search for characters by a specific personality type.
 
--Recieves message via ZeroMQ with a personality type entered by the user.
+-Receives message via ZeroMQ with a personality type entered by the user.
 
 -Stores and searches our database file "character_db.csv" to find matches
 
@@ -78,7 +78,7 @@ Description: This microservice will search for characters by a specific personal
 
 Description: This microservice will search for characters by a specific species type.
 
--Recieves message via ZeroMQ with a species type entered by the user.
+-Receives message via ZeroMQ with a species type entered by the user.
 
 -Stores and searches our database file "character_db.csv" to find matches
 
