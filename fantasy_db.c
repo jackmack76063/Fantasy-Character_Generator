@@ -43,7 +43,7 @@ void searchSpecies();
 int main() {
     char *filePath = malloc(256 * sizeof(char));
     int option = 0;
-    char warning[1];
+    char warning[10];
     bool ifTrue = false;
     Record *head = NULL;
 
@@ -129,9 +129,9 @@ int main() {
 
             case 8: 
 
-                printf("Warning: Are you sure you want to quit?! Quitting will delete any unsaved prograss! (Y/N): ");
-                scanf("%s", warning);
-                if(strcmp(warning, "y") == 0 || strcmp(warning, "y") == 0)  {
+                printf("Warning: Are you sure you want to quit?! Quitting will delete any unsaved progress! (Y/N): ");
+                scanf("%9s", warning);
+                if(strcmp(warning, "y") == 0 || strcmp(warning, "Y") == 0)  {
                     ifTrue = true;
                 }
                 break;
